@@ -1,0 +1,40 @@
+{
+  "name": "gitcomi",
+  "version": "1.0.0",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:main\" \"npm:dev:preload\" \"npm:dev:electron\"",
+    "dev:renderer": "vite dev",
+    "dev:main": "tsc -p tsconfig.main.json --watch --preserveWatchOutput",
+    "dev:preload": "tsc -p tsconfig.preload.json --watch --preserveWatchOutput",
+    "dev:electron": "wait-on http://localhost:5173 file:dist/main/main.js file:dist/preload/index.js && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 ELECTRON_DISABLE_SANDBOX=1 nodemon --watch dist/main --watch dist/preload --exec \"electron --no-sandbox dist/main/main.js\"",
+    "build": "tsc -p tsconfig.main.json && tsc -p tsconfig.preload.json && vite build",
+    "start": "cross-env NODE_ENV=production ELECTRON_DISABLE_SANDBOX=1 electron --no-sandbox dist/main/main.js",
+    "lint": "tsc --noEmit && tsc --noEmit -p tsconfig.main.json && tsc --noEmit -p tsconfig.preload.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@blueprintjs/core": "^6.3.4",
+    "@blueprintjs/icons": "^6.3.1",
+    "classnames": "^2.5.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^18.3.2",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
+    "electron": "^39.1.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1",
+    "wait-on": "^8.0.5"
+  }
+}

@@ -1,0 +1,190 @@
+:root {
+  font-family: 'Segoe UI', 'Hiragino Sans', 'Helvetica Neue', sans-serif;
+  color: #1f2933;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: #f5f8fa;
+}
+
+.app-shell {
+  height: 100vh;
+  display: flex;
+  background-color: #f5f8fa;
+}
+
+.sidebar {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #d3d8de;
+  background-color: #fff;
+}
+
+.file-list-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.file-list-header {
+  padding: 10px 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #e1e8ed;
+  background-color: #f8f9fb;
+}
+
+.file-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.file-list-empty {
+  padding: 12px;
+  color: #738694;
+  font-size: 0.9rem;
+}
+
+.file-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.file-list-item:hover {
+  background-color: #eff6ff;
+}
+
+.file-list-item.is-selected {
+  background-color: #c1e0ff;
+}
+
+.file-list-icon {
+  width: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.file-list-name {
+  flex: 1;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-list-code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.75rem;
+  color: #5f6b7c;
+}
+
+.sidebar-controls {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  border-top: 1px solid #e1e8ed;
+  border-bottom: 1px solid #e1e8ed;
+  background-color: #f8f9fb;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 12px;
+}
+
+.diff-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.diff-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.diff-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.diff-path {
+  font-size: 0.9rem;
+  color: #5c7080;
+}
+
+.diff-body {
+  flex: 1;
+  overflow: auto;
+  background-color: #1e1e1e;
+  border-radius: 4px;
+  padding: 12px;
+  color: #f5f8fa;
+}
+
+.diff-output {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.placeholder {
+  color: #a0aec0;
+}
+
+.commit-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.commit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.commit-body {
+  display: flex;
+  gap: 12px;
+}
+
+.commit-body textarea {
+  flex: 1;
+  min-height: 90px;
+}
+
+.commit-body button {
+  align-self: flex-start;
+}
+
+.feedback {
+  margin-bottom: 8px;
+}
+
+.feedback-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
