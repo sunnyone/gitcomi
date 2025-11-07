@@ -93,12 +93,18 @@ body {
 .sidebar-controls {
   padding: 12px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
   border-top: 1px solid #e1e8ed;
   border-bottom: 1px solid #e1e8ed;
   background-color: #f8f9fb;
+}
+
+.sidebar-control-group {
+  display: flex;
+  gap: 8px;
 }
 
 .content {

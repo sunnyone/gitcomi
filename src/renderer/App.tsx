@@ -176,30 +176,34 @@ const App = () => {
           }}
         />
         <div className="sidebar-controls">
-          <Button
-            icon="chevron-right"
-            title="選択したファイルをステージ"
-            disabled={!selectedFile || selectedFile.staged || isMutating}
-            onClick={stageSelected}
-          />
-          <Button
-            icon="double-chevron-right"
-            title="すべてステージ"
-            disabled={!workingFiles.length || isMutating}
-            onClick={stageAll}
-          />
-          <Button
-            icon="chevron-left"
-            title="選択したファイルをアンステージ"
-            disabled={!selectedFile || !selectedFile.staged || isMutating}
-            onClick={unstageSelected}
-          />
-          <Button
-            icon="double-chevron-left"
-            title="すべてアンステージ"
-            disabled={!stagedFiles.length || isMutating}
-            onClick={unstageAll}
-          />
+          <div className="sidebar-control-group">
+            <Button
+              icon="chevron-down"
+              title="選択したファイルをステージ"
+              disabled={!selectedFile || selectedFile.staged || isMutating}
+              onClick={stageSelected}
+            />
+            <Button
+              icon="double-chevron-down"
+              title="すべてステージ"
+              disabled={!workingFiles.length || isMutating}
+              onClick={stageAll}
+            />
+          </div>
+          <div className="sidebar-control-group">
+            <Button
+              icon="chevron-up"
+              title="選択したファイルをアンステージ"
+              disabled={!selectedFile || !selectedFile.staged || isMutating}
+              onClick={unstageSelected}
+            />
+            <Button
+              icon="double-chevron-up"
+              title="すべてアンステージ"
+              disabled={!stagedFiles.length || isMutating}
+              onClick={unstageAll}
+            />
+          </div>
         </div>
         <FileList
           title={`Stage (${stagedFiles.length})`}
