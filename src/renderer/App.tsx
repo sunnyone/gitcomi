@@ -2,6 +2,7 @@ import { Button, Callout, Card, Spinner, TextArea } from '@blueprintjs/core';
 import type { GitFileStatus } from 'git-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import FileList from './components/FileList';
+import DiffView from './components/DiffView';
 
 interface SelectedFileRef {
   path: string;
@@ -241,11 +242,7 @@ const App = () => {
           <div className="diff-body">
             {!selectedFile && <div className="placeholder">ファイルを選択してください。</div>}
             {selectedFile && isLoadingDiff && <Spinner />}
-            {selectedFile && !isLoadingDiff && (
-              <pre className="diff-output">
-                {diff || '差分はありません'}
-              </pre>
-            )}
+            {selectedFile && !isLoadingDiff && <DiffView diff={diff} />}
           </div>
         </Card>
         <Card className="commit-pane" elevation={1}>

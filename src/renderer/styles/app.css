@@ -150,8 +150,43 @@ body {
 
 .diff-output {
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   white-space: pre-wrap;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85rem;
+}
+
+.diff-line {
+  display: block;
+  border-radius: 4px;
+  padding: 2px 6px;
+  line-height: 1.35;
+}
+
+.diff-line-context {
+  color: #f5f8fa;
+}
+
+.diff-line-add {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #b7f5d2;
+}
+
+.diff-line-remove {
+  background-color: rgba(248, 113, 113, 0.2);
+  color: #fecdd3;
+}
+
+.diff-line-hunk {
+  background-color: rgba(96, 165, 250, 0.2);
+  color: #bfdbfe;
+  font-weight: 600;
+}
+
+.diff-line-meta {
+  color: #cbd5f5;
 }
 
 .placeholder {
