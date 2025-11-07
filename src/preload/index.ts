@@ -10,7 +10,9 @@ const gitAPI = {
   getDiff: (payload: { path: string; staged: boolean; isUntracked?: boolean }): Promise<GitDiffPayload> =>
     ipcRenderer.invoke('git:getDiff', payload),
   commit: (message: string): Promise<GitCommitResult> => ipcRenderer.invoke('git:commit', message),
-  discardChanges: (payload: { path: string; isUntracked?: boolean }) => ipcRenderer.invoke('git:discardChanges', payload)
+  discardChanges: (payload: { path: string; isUntracked?: boolean }) => ipcRenderer.invoke('git:discardChanges', payload),
+  getRepository: () => ipcRenderer.invoke('repo:getCurrent'),
+  selectRepository: () => ipcRenderer.invoke('repo:select')
 };
 
 contextBridge.exposeInMainWorld('gitAPI', gitAPI);

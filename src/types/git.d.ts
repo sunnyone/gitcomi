@@ -23,4 +23,8 @@ declare module 'git-types' {
     success: boolean;
     message: string;
   }
+
+  export interface GitRepositoryInfo {
+    path: string;
+  }
 }

@@ -7,18 +7,57 @@ import type { GitCommitResult, GitDiffPayload, GitFileStatus, GitStatusPayload }
 const execFileAsync = promisify(execFile);
 const workspaceRoot = process.cwd();
 let repoRoot: string | null = null;
+let repoDetectionPromise: Promise<string | null> | null = null;
+
+async function detectRepoFromWorkspace(): Promise<string | null> {
+  try {
+    const { stdout } = await execFileAsync('git', ['rev-parse', '--show-toplevel'], { cwd: workspaceRoot });
+    repoRoot = stdout.trim();
+    return repoRoot;
+  } catch {
+    return null;
+  }
+}
 
 interface RunGitOptions extends ExecFileOptions {
   allowCodes?: number[];
 }
 
-async function ensureRepoRoot(): Promise<string> {
+async function resolveRepoRoot(): Promise<string | null> {
   if (repoRoot) {
     return repoRoot;
   }
-  const { stdout } = await execFileAsync('git', ['rev-parse', '--show-toplevel'], { cwd: workspaceRoot });
-  repoRoot = stdout.trim();
+
+  if (!repoDetectionPromise) {
+    repoDetectionPromise = detectRepoFromWorkspace();
+  }
+
+  await repoDetectionPromise;
   return repoRoot;
+}
+
+async function ensureRepoRoot(): Promise<string> {
+  const resolved = await resolveRepoRoot();
+  if (resolved) {
+    return resolved;
+  }
+
+  throw new Error('Gitリポジトリが選択されていません。リポジトリを選択してください。');
+}
+
+async function resolveRepoRootFromPath(pathCandidate: string): Promise<string> {
+  const { stdout } = await execFileAsync('git', ['rev-parse', '--show-toplevel'], { cwd: pathCandidate });
+  return stdout.trim();
+}
+
+export async function setRepositoryRoot(pathCandidate: string): Promise<string> {
+  repoRoot = await resolveRepoRootFromPath(pathCandidate);
+  repoDetectionPromise = null;
+  return repoRoot;
+}
+
+export async function getRepositoryRoot(): Promise<string | null> {
+  return resolveRepoRoot();
 }
 
 async function runGit(args: string[], options: RunGitOptions = {}) {

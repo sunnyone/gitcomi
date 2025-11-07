@@ -1,4 +1,4 @@
-import type { GitCommitResult, GitDiffPayload, GitStatusPayload } from 'git-types';
+import type { GitCommitResult, GitDiffPayload, GitRepositoryInfo, GitStatusPayload } from 'git-types';
 
 declare global {
   interface Window {
@@ -11,6 +11,8 @@ declare global {
       getDiff: (payload: { path: string; staged: boolean; isUntracked?: boolean }) => Promise<GitDiffPayload>;
       commit: (message: string) => Promise<GitCommitResult>;
       discardChanges: (payload: { path: string; isUntracked?: boolean }) => Promise<void>;
+      getRepository: () => Promise<GitRepositoryInfo | null>;
+      selectRepository: () => Promise<GitRepositoryInfo | null>;
     };
   }
 }

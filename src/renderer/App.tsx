@@ -19,6 +19,8 @@ const App = () => {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [isStatusLoading, setIsStatusLoading] = useState(true);
+  const [repositoryPath, setRepositoryPath] = useState<string | null>(null);
+  const [isSelectingRepo, setIsSelectingRepo] = useState(false);
 
   const workingFiles = useMemo(() => files.filter((file) => !file.staged), [files]);
   const stagedFiles = useMemo(() => files.filter((file) => file.staged), [files]);
@@ -33,7 +35,22 @@ const App = () => {
     setInfo(null);
   }, []);
 
+  useEffect(() => {
+    window.gitAPI
+      .getRepository()
+      .then((repo) => setRepositoryPath(repo?.path ?? null))
+      .catch((err) => handleError((err as Error).message));
+  }, [handleError]);
+
   const refreshStatus = useCallback(async () => {
+    if (!repositoryPath) {
+      setFiles([]);
+      setSelected(null);
+      setDiff('');
+      setIsStatusLoading(false);
+      return;
+    }
+
     setIsStatusLoading(true);
     try {
       const status = await window.gitAPI.getStatus();
@@ -66,14 +83,14 @@ const App = () => {
     } finally {
       setIsStatusLoading(false);
     }
-  }, [handleError]);
+  }, [repositoryPath, handleError]);
 
   useEffect(() => {
     refreshStatus();
   }, [refreshStatus]);
 
   useEffect(() => {
-    if (!selectedFile) {
+    if (!selectedFile || !repositoryPath) {
       setDiff('');
       setIsLoadingDiff(false);
       return;
@@ -94,9 +111,14 @@ const App = () => {
     return () => {
       mounted = false;
     };
-  }, [selectedFile, handleError]);
+  }, [selectedFile, repositoryPath, handleError]);
 
   const runGitAction = useCallback(async (action: () => Promise<void>) => {
+    if (!repositoryPath) {
+      handleError('リポジトリが選択されていません。');
+      return;
+    }
+
     setIsMutating(true);
     try {
       await action();
@@ -106,7 +128,23 @@ const App = () => {
     } finally {
       setIsMutating(false);
     }
-  }, [refreshStatus, handleError]);
+  }, [repositoryPath, refreshStatus, handleError]);
+
+  const chooseRepository = useCallback(async () => {
+    setIsSelectingRepo(true);
+    try {
+      const repo = await window.gitAPI.selectRepository();
+      if (repo?.path) {
+        setRepositoryPath(repo.path);
+        setInfo(`リポジトリを選択しました: ${repo.path}`);
+        setError(null);
+      }
+    } catch (err) {
+      handleError((err as Error).message);
+    } finally {
+      setIsSelectingRepo(false);
+    }
+  }, [handleError]);
 
   const stageFile = (file: GitFileStatus) => {
     if (file.staged) return;
@@ -141,14 +179,14 @@ const App = () => {
   };
 
   const discardSelected = () => {
-    if (!selectedFile || selectedFile.staged) return;
+    if (!repositoryPath || !selectedFile || selectedFile.staged) return;
     const confirmed = window.confirm('選択した変更を破棄しますか？この操作は元に戻せません。');
     if (!confirmed) return;
     runGitAction(() => window.gitAPI.discardChanges({ path: selectedFile.path, isUntracked: selectedFile.isUntracked }));
   };
 
   const handleCommit = async () => {
-    if (!commitMessage.trim() || !stagedFiles.length) return;
+    if (!repositoryPath || !commitMessage.trim() || !stagedFiles.length) return;
     setIsMutating(true);
     try {
       await window.gitAPI.commit(commitMessage.trim());
@@ -167,7 +205,7 @@ const App = () => {
     setSelected({ path: file.path, staged: file.staged });
   };
 
-  const canCommit = Boolean(commitMessage.trim()) && stagedFiles.length > 0 && !isMutating;
+  const canCommit = Boolean(repositoryPath) && Boolean(commitMessage.trim()) && stagedFiles.length > 0 && !isMutating;
 
   return (
     <div className="app-shell">
@@ -188,13 +226,13 @@ const App = () => {
             <Button
               icon="chevron-down"
               title="選択したファイルをステージ"
-              disabled={!selectedFile || selectedFile.staged || isMutating}
+              disabled={!repositoryPath || !selectedFile || selectedFile.staged || isMutating}
               onClick={stageSelected}
             />
             <Button
               icon="double-chevron-down"
               title="すべてステージ"
-              disabled={!workingFiles.length || isMutating}
+              disabled={!repositoryPath || !workingFiles.length || isMutating}
               onClick={stageAll}
             />
           </div>
@@ -203,7 +241,7 @@ const App = () => {
               icon="trash"
               intent="danger"
               title="選択した変更を破棄"
-              disabled={!selectedFile || selectedFile.staged || isMutating}
+              disabled={!repositoryPath || !selectedFile || selectedFile.staged || isMutating}
               onClick={discardSelected}
             />
           </div>
@@ -211,13 +249,13 @@ const App = () => {
             <Button
               icon="chevron-up"
               title="選択したファイルをアンステージ"
-              disabled={!selectedFile || !selectedFile.staged || isMutating}
+              disabled={!repositoryPath || !selectedFile || !selectedFile.staged || isMutating}
               onClick={unstageSelected}
             />
             <Button
               icon="double-chevron-up"
               title="すべてアンステージ"
-              disabled={!stagedFiles.length || isMutating}
+              disabled={!repositoryPath || !stagedFiles.length || isMutating}
               onClick={unstageAll}
             />
           </div>
@@ -247,6 +285,42 @@ const App = () => {
             </div>
           </Callout>
         )}
+        <Card className="repo-bar" elevation={1}>
+          <div className="repo-info">
+            <div className="repo-label">対象リポジトリ</div>
+            <div className="repo-path">{repositoryPath ?? '未選択'}</div>
+          </div>
+          <div className="repo-actions">
+            <Button
+              icon="refresh"
+              minimal
+              title="ステータスを再読み込み"
+              disabled={!repositoryPath || isStatusLoading}
+              onClick={refreshStatus}
+            />
+            <Button
+              icon="folder-open"
+              intent="primary"
+              text={repositoryPath ? 'リポジトリを変更' : 'リポジトリを選択'}
+              loading={isSelectingRepo}
+              onClick={chooseRepository}
+            />
+          </div>
+        </Card>
+        {!repositoryPath && (
+          <Callout intent="primary" className="repo-onboarding">
+            <div className="repo-onboarding-row">
+              <span>Gitリポジトリを選択すると変更状況を確認できます。</span>
+              <Button
+                icon="folder-open"
+                intent="primary"
+                text="リポジトリを選択"
+                loading={isSelectingRepo}
+                onClick={chooseRepository}
+              />
+            </div>
+          </Callout>
+        )}
         <Card className="diff-pane" elevation={1}>
           <div className="diff-header">
             <div>
@@ -256,22 +330,29 @@ const App = () => {
             {isStatusLoading && <Spinner size={20} />}
           </div>
           <div className="diff-body">
-            {!selectedFile && <div className="placeholder">ファイルを選択してください。</div>}
-            {selectedFile && isLoadingDiff && <Spinner />}
-            {selectedFile && !isLoadingDiff && <DiffView diff={diff} />}
+            {!repositoryPath && <div className="placeholder">リポジトリを選択してください。</div>}
+            {repositoryPath && !selectedFile && <div className="placeholder">ファイルを選択してください。</div>}
+            {repositoryPath && selectedFile && isLoadingDiff && <Spinner />}
+            {repositoryPath && selectedFile && !isLoadingDiff && <DiffView diff={diff} />}
           </div>
         </Card>
         <Card className="commit-pane" elevation={1}>
           <div className="commit-header">
             <div>コミットメッセージ</div>
             <div className="commit-actions">
-              <Button icon="refresh" minimal disabled={isMutating} onClick={refreshStatus} />
+              <Button
+                icon="refresh"
+                minimal
+                disabled={!repositoryPath || isMutating}
+                onClick={refreshStatus}
+              />
             </div>
           </div>
           <div className="commit-body">
             <TextArea
               placeholder="コミットメッセージを入力"
               value={commitMessage}
+              disabled={!repositoryPath}
               onChange={(e) => setCommitMessage(e.currentTarget.value)}
             />
             <Button
