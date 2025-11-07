@@ -140,6 +140,13 @@ const App = () => {
     runGitAction(() => window.gitAPI.unstageAll());
   };
 
+  const discardSelected = () => {
+    if (!selectedFile || selectedFile.staged) return;
+    const confirmed = window.confirm('選択した変更を破棄しますか？この操作は元に戻せません。');
+    if (!confirmed) return;
+    runGitAction(() => window.gitAPI.discardChanges({ path: selectedFile.path, isUntracked: selectedFile.isUntracked }));
+  };
+
   const handleCommit = async () => {
     if (!commitMessage.trim() || !stagedFiles.length) return;
     setIsMutating(true);
@@ -189,6 +196,15 @@ const App = () => {
               title="すべてステージ"
               disabled={!workingFiles.length || isMutating}
               onClick={stageAll}
+            />
+          </div>
+          <div className="sidebar-control-group">
+            <Button
+              icon="trash"
+              intent="danger"
+              title="選択した変更を破棄"
+              disabled={!selectedFile || selectedFile.staged || isMutating}
+              onClick={discardSelected}
             />
           </div>
           <div className="sidebar-control-group">

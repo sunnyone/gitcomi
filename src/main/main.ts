@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import {
   commit,
+  discardChanges,
   getDiff,
   getStatus,
   stageAll,
@@ -43,6 +44,9 @@ function registerIpcHandlers() {
     getDiff(payload)
   );
   ipcMain.handle('git:commit', async (_event, message: string) => commit(message));
+  ipcMain.handle('git:discardChanges', async (_event, payload: { path: string; isUntracked?: boolean }) =>
+    discardChanges(payload)
+  );
 }
 
 app.whenReady().then(() => {

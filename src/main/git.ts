@@ -99,6 +99,19 @@ export async function unstageAll(): Promise<void> {
   await runGit(['reset', 'HEAD']);
 }
 
+export async function discardChanges(payload: { path: string; isUntracked?: boolean }): Promise<void> {
+  const { path: pathname, isUntracked } = payload;
+  if (!pathname) {
+    return;
+  }
+
+  if (isUntracked) {
+    await runGit(['clean', '-fd', '--', pathname]);
+  } else {
+    await runGit(['checkout', '--', pathname]);
+  }
+}
+
 export async function getDiff(payload: { path: string; staged: boolean; isUntracked?: boolean }): Promise<GitDiffPayload> {
   const { path: pathname, staged, isUntracked } = payload;
   const args = staged ? ['diff', '--cached', '--', pathname] : ['diff', '--', pathname];

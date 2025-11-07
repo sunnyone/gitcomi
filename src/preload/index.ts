@@ -9,7 +9,8 @@ const gitAPI = {
   unstageAll: () => ipcRenderer.invoke('git:unstageAll'),
   getDiff: (payload: { path: string; staged: boolean; isUntracked?: boolean }): Promise<GitDiffPayload> =>
     ipcRenderer.invoke('git:getDiff', payload),
-  commit: (message: string): Promise<GitCommitResult> => ipcRenderer.invoke('git:commit', message)
+  commit: (message: string): Promise<GitCommitResult> => ipcRenderer.invoke('git:commit', message),
+  discardChanges: (payload: { path: string; isUntracked?: boolean }) => ipcRenderer.invoke('git:discardChanges', payload)
 };
 
 contextBridge.exposeInMainWorld('gitAPI', gitAPI);

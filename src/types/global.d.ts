@@ -10,6 +10,7 @@ declare global {
       unstageAll: () => Promise<void>;
       getDiff: (payload: { path: string; staged: boolean; isUntracked?: boolean }) => Promise<GitDiffPayload>;
       commit: (message: string) => Promise<GitCommitResult>;
+      discardChanges: (payload: { path: string; isUntracked?: boolean }) => Promise<void>;
     };
   }
 }
