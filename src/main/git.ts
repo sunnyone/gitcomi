@@ -77,7 +77,7 @@ function parseStatus(output: string): GitFileStatus[] {
 }
 
 export async function getStatus(): Promise<GitStatusPayload> {
-  const { stdout } = await runGit(['status', '--short']);
+  const { stdout } = await runGit(['status', '--short', '--untracked-files=all']);
   return { files: parseStatus(stdout) };
 }
 
