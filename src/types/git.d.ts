@@ -23,4 +23,9 @@ declare module 'git-types' {
     success: boolean;
     message: string;
   }
+
+  export interface GitCommitPayload {
+    message: string;
+    amend?: boolean;
+  }
 }

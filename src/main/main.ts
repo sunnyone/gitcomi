@@ -4,6 +4,7 @@ import {
   commit,
   discardChanges,
   getDiff,
+  getLastCommitMessage,
   getStatus,
   stageAll,
   stageFiles,
@@ -43,7 +44,8 @@ function registerIpcHandlers() {
   ipcMain.handle('git:getDiff', async (_event, payload: { path: string; staged: boolean; isUntracked?: boolean }) =>
     getDiff(payload)
   );
-  ipcMain.handle('git:commit', async (_event, message: string) => commit(message));
+  ipcMain.handle('git:commit', async (_event, payload: { message: string; amend?: boolean }) => commit(payload));
+  ipcMain.handle('git:getLastCommitMessage', async () => getLastCommitMessage());
   ipcMain.handle('git:discardChanges', async (_event, payload: { path: string; isUntracked?: boolean }) =>
     discardChanges(payload)
   );

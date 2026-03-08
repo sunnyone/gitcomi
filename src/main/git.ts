@@ -2,7 +2,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import path from 'node:path';
 import type { ExecFileOptions } from 'node:child_process';
-import type { GitCommitResult, GitDiffPayload, GitFileStatus, GitStatusPayload } from 'git-types';
+import type { GitCommitPayload, GitCommitResult, GitDiffPayload, GitFileStatus, GitStatusPayload } from 'git-types';
 
 const execFileAsync = promisify(execFile);
 const workspaceRoot = process.cwd();
@@ -127,10 +127,20 @@ export async function getDiff(payload: { path: string; staged: boolean; isUntrac
   return { path: pathname, staged, diff: stdout };
 }
 
-export async function commit(message: string): Promise<GitCommitResult> {
+export async function getLastCommitMessage(): Promise<string> {
+  const { stdout } = await runGit(['log', '-1', '--pretty=%B']);
+  return stdout.trimEnd();
+}
+
+export async function commit(payload: GitCommitPayload): Promise<GitCommitResult> {
+  const { message, amend } = payload;
   if (!message.trim()) {
     throw new Error('Commit message is empty');
   }
-  await runGit(['commit', '-m', message]);
+  const args = ['commit', '-m', message];
+  if (amend) {
+    args.splice(1, 0, '--amend');
+  }
+  await runGit(args);
   return { success: true, message: 'Commit created' };
 }

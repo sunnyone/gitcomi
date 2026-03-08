@@ -1,4 +1,4 @@
-import { Button, Callout, Card, Spinner, TextArea } from '@blueprintjs/core';
+import { Button, Callout, Card, Checkbox, Spinner, TextArea } from '@blueprintjs/core';
 import type { GitFileStatus } from 'git-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import FileList from './components/FileList';
@@ -16,6 +16,7 @@ const App = () => {
   const [isLoadingDiff, setIsLoadingDiff] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
   const [commitMessage, setCommitMessage] = useState('');
+  const [isAmend, setIsAmend] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [isStatusLoading, setIsStatusLoading] = useState(true);
@@ -148,11 +149,12 @@ const App = () => {
   };
 
   const handleCommit = async () => {
-    if (!commitMessage.trim() || !stagedFiles.length) return;
+    if (!commitMessage.trim() || (!stagedFiles.length && !isAmend)) return;
     setIsMutating(true);
     try {
-      await window.gitAPI.commit(commitMessage.trim());
+      await window.gitAPI.commit({ message: commitMessage.trim(), amend: isAmend });
       setCommitMessage('');
+      setIsAmend(false);
       setInfo('コミットを作成しました。');
       setError(null);
       await refreshStatus();
@@ -167,7 +169,24 @@ const App = () => {
     setSelected({ path: file.path, staged: file.staged });
   };
 
-  const canCommit = Boolean(commitMessage.trim()) && stagedFiles.length > 0 && !isMutating;
+  const handleAmendChange = async (nextChecked: boolean) => {
+    if (isMutating) return;
+    setIsAmend(nextChecked);
+
+    if (!nextChecked || commitMessage.trim()) {
+      return;
+    }
+
+    try {
+      const lastCommitMessage = await window.gitAPI.getLastCommitMessage();
+      setCommitMessage((current) => (current.trim() ? current : lastCommitMessage));
+      setError(null);
+    } catch (err) {
+      handleError((err as Error).message);
+    }
+  };
+
+  const canCommit = Boolean(commitMessage.trim()) && (stagedFiles.length > 0 || isAmend) && !isMutating;
 
   return (
     <div className="app-shell">
@@ -269,18 +288,15 @@ const App = () => {
             </div>
           </div>
           <div className="commit-body">
-            <TextArea
-              placeholder="コミットメッセージを入力"
-              value={commitMessage}
-              onChange={(e) => setCommitMessage(e.currentTarget.value)}
-            />
-            <Button
-              intent="primary"
-              icon="git-commit"
-              large
-              onClick={handleCommit}
-              disabled={!canCommit}
-            >
+            <div className="commit-form">
+              <TextArea
+                placeholder="コミットメッセージを入力"
+                value={commitMessage}
+                onChange={(e) => setCommitMessage(e.currentTarget.value)}
+              />
+              <Checkbox checked={isAmend} label="amend" disabled={isMutating} onChange={(e) => void handleAmendChange(e.currentTarget.checked)} />
+            </div>
+            <Button intent="primary" icon="git-commit" large onClick={handleCommit} disabled={!canCommit}>
               Commit
             </Button>
           </div>
